@@ -41,6 +41,11 @@ See a standard let-in for reference:
   > let x = 2
   > end
   > 
+  > module
+  > N
+  > =
+  > List
+  > 
   > let x =
   > let
   > module
@@ -50,7 +55,13 @@ See a standard let-in for reference:
   > let x = 2
   > end
   > in
-  > M.map
+  > let
+  > module
+  > N
+  > =
+  > List
+  > in
+  > N.singleton M.x
   > EOF
 
   $ ocp-indent test.ml
@@ -61,6 +72,11 @@ See a standard let-in for reference:
     let x = 2
   end
   
+  module
+    N
+    =
+    List
+  
   let x =
     let
       module
@@ -70,7 +86,13 @@ See a standard let-in for reference:
       let x = 2
     end
     in
-    M.map
+    let
+      module
+      N
+      =
+      List
+    in
+    N.singleton M.x
 
 2. let open _ in:
 
@@ -129,3 +151,348 @@ See a standard let-in for reference:
         int
     in
     try 0 with E i -> i
+
+4. let type t = _ in:
+
+  $ cat > test.ml << EOF
+  > type
+  > t
+  > =
+  > | A
+  > | B of int
+  > 
+  > let x =
+  > let
+  > type
+  > t
+  > =
+  > | A
+  > | B of int
+  > in
+  > match A with A -> 0 | B i -> i
+  > EOF
+
+  $ ocp-indent test.ml
+  type
+    t
+    =
+    | A
+    | B of int
+  
+  let x =
+    let
+  type
+    t
+    =
+    | A
+    | B of int
+  in
+  match A with A -> 0 | B i -> i
+
+5. let type t += _ in:
+
+  $ cat > test.ml << EOF
+  > type t
+  > +=
+  > | A
+  > | B of int
+  > 
+  > let x =
+  > let
+  > type
+  > t
+  > +=
+  > | A
+  > | B of int
+  > in
+  > match A with A -> 0 | B i -> i | _ -> 0
+  > EOF
+
+  $ ocp-indent test.ml
+  type t
+    +=
+    | A
+    | B of int
+  
+  let x =
+    let
+  type
+    t
+    +=
+    | A
+    | B of int
+  in
+  match A with A -> 0 | B i -> i | _ -> 0
+
+6. let module type _ in:
+
+  $ cat > test.ml << EOF
+  > module
+  > type
+  > S
+  > =
+  > sig
+  > val x : int
+  > end
+  > 
+  > let x =
+  > let
+  > module
+  > type
+  > S
+  > =
+  > sig
+  > val x : int
+  > end
+  > in
+  > ()
+  > EOF
+
+  $ ocp-indent test.ml
+  module
+    type
+    S
+  =
+  sig
+    val x : int
+  end
+  
+  let x =
+    let
+      module
+      type
+      S
+    =
+    sig
+      val x : int
+    end
+    in
+    ()
+
+7. let external _ in:
+
+  $ cat > test.ml << EOF
+  > external
+  > f
+  > :
+  > int -> int
+  > =
+  > "f"
+  > 
+  > let x =
+  > let
+  > external
+  > f
+  > :
+  > int -> int
+  > =
+  > "f"
+  > in
+  > f 2
+  > EOF
+
+  $ ocp-indent test.ml
+  external
+    f
+    :
+    int -> int
+    =
+    "f"
+  
+  let x =
+    let
+  external
+    f
+    :
+    int -> int
+    =
+    "f"
+  in
+  f 2
+
+8. let class _ in:
+
+  $ cat > test.ml << EOF
+  > class
+  > c
+  > =
+  > object
+  > method f x = x + 1
+  > end
+  > 
+  > let x =
+  > let
+  > class
+  > c
+  > =
+  > object
+  > method f x = x + 1
+  > end
+  > in
+  > (new c)#f 1
+  > EOF
+
+  $ ocp-indent test.ml
+  class
+    c
+    =
+    object
+      method f x = x + 1
+    end
+  
+  let x =
+    let
+  class
+    c
+    =
+    object
+      method f x = x + 1
+    end
+  in
+  (new c)#f 1
+
+9. let class type _ in:
+
+  $ cat > test.ml << EOF
+  > class
+  > type
+  > c
+  > =
+  > object
+  > method f : int -> int
+  > end
+  > 
+  > let x =
+  > let
+  > class
+  > type
+  > c
+  > =
+  > object
+  > method f : int -> int
+  > end
+  > in
+  > ()
+  > EOF
+
+  $ ocp-indent test.ml
+  class
+    type
+    c
+    =
+    object
+      method f : int -> int
+    end
+  
+  let x =
+    let
+  class
+    type
+    c
+    =
+    object
+      method f : int -> int
+    end
+  in
+  ()
+
+9. let module rec _ in:
+
+  $ cat > test.ml << EOF
+  > module
+  > rec
+  > N
+  > :
+  > sig
+  > val x : int
+  > end
+  > =
+  > struct
+  > let x = 1
+  > end
+  > and
+  > M
+  > :
+  > sig
+  > val x : int
+  > end
+  > =
+  > struct
+  > let x = 2
+  > end
+  > 
+  > let x =
+  > let
+  > module
+  > rec
+  > N
+  > :
+  > sig
+  > val x : int
+  > end
+  > =
+  > struct
+  > let x = 1
+  > end
+  > and
+  > M
+  > :
+  > sig
+  > val x : int
+  > end
+  > =
+  > struct
+  > let x = 2
+  > end
+  > in
+  > M.x + N.x
+  > EOF
+
+  $ ocp-indent test.ml
+  module
+    rec
+    N
+    :
+    sig
+      val x : int
+    end
+  =
+  struct
+    let x = 1
+  end
+  and
+    M
+    :
+    sig
+      val x : int
+    end
+  =
+  struct
+    let x = 2
+  end
+  
+  let x =
+    let
+      module
+      rec
+      N
+      :
+      sig
+        val x : int
+      end
+    =
+    struct
+      let x = 1
+    end
+    and
+      M
+      :
+      sig
+        val x : int
+      end
+    =
+    struct
+      let x = 2
+    end
+    in
+    M.x + N.x
