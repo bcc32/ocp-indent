@@ -181,13 +181,13 @@ See a standard let-in for reference:
   
   let x =
     let
-  type
-    t
-    =
-    | A
-    | B of int
-  in
-  match A with A -> 0 | B i -> i
+      type
+        t
+        =
+        | A
+        | B of int
+    in
+    match A with A -> 0 | B i -> i
 
 5. let type t += _ in:
 
@@ -216,13 +216,13 @@ See a standard let-in for reference:
   
   let x =
     let
-  type
-    t
-    +=
-    | A
-    | B of int
-  in
-  match A with A -> 0 | B i -> i | _ -> 0
+      type
+        t
+        +=
+        | A
+        | B of int
+    in
+    match A with A -> 0 | B i -> i | _ -> 0
 
 6. let module type _ in:
 
@@ -301,14 +301,14 @@ See a standard let-in for reference:
   
   let x =
     let
-  external
-    f
-    :
-    int -> int
-    =
-    "f"
-  in
-  f 2
+      external
+        f
+        :
+        int -> int
+        =
+        "f"
+    in
+    f 2
 
 8. let class _ in:
 
@@ -342,14 +342,14 @@ See a standard let-in for reference:
   
   let x =
     let
-  class
-    c
-    =
-    object
-      method f x = x + 1
-    end
-  in
-  (new c)#f 1
+      class
+        c
+        =
+        object
+          method f x = x + 1
+        end
+    in
+    (new c)#f 1
 
 9. let class type _ in:
 
@@ -386,15 +386,15 @@ See a standard let-in for reference:
   
   let x =
     let
-  class
-    type
-    c
-    =
-    object
-      method f : int -> int
-    end
-  in
-  ()
+      class
+        type
+        c
+        =
+        object
+          method f : int -> int
+        end
+    in
+    ()
 
 9. let module rec _ in:
 

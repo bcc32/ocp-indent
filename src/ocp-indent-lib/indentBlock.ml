@@ -30,6 +30,7 @@ module Node = struct
     | KBracket
     | KBracketBar
     | KLet
+    | KClass
     | KAnd of kind
     | KLetIn
     | KIn
@@ -114,6 +115,7 @@ module Node = struct
     | KBracketBar -> "KBracketBar"
     (* | KField -> "KField" *)
     | KLet -> "KLet"
+    | KClass -> "KClass"
     | KIn -> "KIn"
     | KAnd k -> aux "KAnd" k
     | KLetIn -> "KLetIn"
@@ -1058,7 +1060,11 @@ let rec update_path config block stream tok =
   (*   append KLetIn L config.i_base (fold_expr block.path) *)
 
   | CLASS ->
-      append KLet L (unwind_top block.path)
+      (match last_token block with
+       | Some LET (* let class (type) c = *) ->
+           append KClass L block.path
+       | _ ->
+           append KClass L (unwind_top block.path))
 
   | METHOD ->
       append KLet L (unwind_top block.path)
@@ -1076,7 +1082,7 @@ let rec update_path config block stream tok =
 
   | AND ->
       let unwind_to = function
-        | KLet | KLetIn | KType | KModule | KParen -> true
+        | KLet | KLetIn | KType | KModule | KParen | KClass -> true
         | _ -> false
       in let path = unwind (unwind_to @* follow) block.path in
       (match path with
@@ -1110,6 +1116,7 @@ let rec update_path config block stream tok =
   | TYPE ->
       (match last_token block with
        | Some (MODULE | CLASS) -> append KUnknown L block.path (* module type *)
+       | Some LET (* let type *)
        | Some (WITH|AND)
        | Some COLON (* 'type' inside type decl, for GADTs *)
          -> append KType L block.path
@@ -1293,7 +1300,7 @@ let rec update_path config block stream tok =
         | {kind=KFun} :: ({kind=KExpr i} as e) :: path when i = prio_flatop ->
             (* eg '>>= fun x ->': indent like the top of the expression *)
             {e with kind = KExpr 0} :: path
-        | {kind=KFun; line } :: {kind=KBody(KLet|KLetIn); line=letline} :: _
+        | {kind=KFun; line } :: {kind=KBody(KLet|KLetIn|KClass); line=letline} :: _
           when next_offset tok stream = None
             && line = current_line && line <> letline
           ->
@@ -1348,8 +1355,9 @@ let rec update_path config block stream tok =
         | KExternal | KModule | KType | KLet | KLetIn | KException | KVal
         | KBar KType
         | KStruct | KSig | KObject
-        | KAnd(KModule|KType|KLet|KLetIn)
+        | KAnd(KModule|KType|KLet|KLetIn|KClass)
         | KConstraint
+        | KClass
         | KExtendedItem _ | KExtendedExpr _ -> true
         | _ -> false
       in
@@ -1427,14 +1435,15 @@ let rec update_path config block stream tok =
       let path = unwind (function
           | KParen | KBegin | KBrace | KBracket | KBracketBar | KBody _
           | KModule | KLet | KLetIn | KExternal | KVal | KColon
-          | KAnd(KModule|KLet|KLetIn) | KBar KType -> true
+          | KClass
+          | KAnd(KModule|KLet|KLetIn|KClass) | KBar KType -> true
           | _ -> false)
           block.path
       in
       (match path with
        | {kind = KBody(KVal|KType|KExternal) | KColon} :: _ -> tuple_or_argument_label ()
-       | {kind = KModule|KLet|KLetIn
-                 | KAnd(KModule|KLet|KLetIn)} :: _ ->
+       | {kind = KModule|KLet|KLetIn|KClass
+                 | KAnd(KModule|KLet|KLetIn|KClass)} :: _ ->
            append KColon L path
        | {kind = KExternal} :: _ as path ->
            append KColon L ~pad:(if starts_line then 0 else config.i_base) path
@@ -1467,9 +1476,10 @@ let rec update_path config block stream tok =
        | _ -> make_infix tok block.path)
 
   | EXTERNAL ->
-      (match block.path with
-       | {kind = KBody (KType)} :: _ ->
-           append KExternal L block.path
+      (match block.path, last_token block with
+       | _, Some LET (* let external *)
+       | {kind = KBody (KType)} :: _, _ (* type t = external "x" *)
+         -> append KExternal L block.path
        | _ ->
            append KExternal L (unwind_top block.path))
 
