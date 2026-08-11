@@ -1395,12 +1395,29 @@ let rec update_path config block stream tok =
                | _, (KType | KBody KType) -> config.i_type
                | _ -> config.i_base
              in
+             let body, h, p =
+               match kind, p with
+               | ( (KType | KExternal | KClass)
+                 , ({kind = (KLet | KLetIn) as k; _} as h')::p') ->
+                   (* for:
+                      - [let type t = ...]
+                      - [let external f = ...]
+                      - [let class c = ...]
+
+                      We treat anything after [=] as the body of the [let]
+                      rather than as the body of type/external/class to
+                      avoid unaesthetic over indentation while preserving
+                      decent indentation of what comes between [let] and [=]. *)
+                   KBody k, h', p'
+               | _ ->
+                   KBody kind, h, p
+             in
              if starts_line then
                let h = {h with indent = h.indent + indent; pad = 0} in
-               replace (KBody kind) L ~pad:0 (h :: p)
+               replace body L ~pad:0 (h::p)
              else
                let h = {h with indent = h.column} in
-               replace (KBody kind) T ~pad:indent (h :: p))
+               replace body T ~pad:indent (h::p))
       in
       find_parent block.path
 
@@ -1414,12 +1431,20 @@ let rec update_path config block stream tok =
              | Some BAR when config.i_strict_with = Always -> config.i_with
              | _ -> config.i_type
            in
+           let body, h, p =
+             match p with
+             | ({kind = (KLet | KLetIn) as k; _} as h')::p' ->
+                 (* [let type t += ...] is handled as [let type t =],
+                    we treat anything after [=] as the body of the [let]. *)
+                 KBody k, h', p'
+             | _ -> KBody KType, h, p
+           in
            if starts_line then
              let h = {h with indent = h.indent + indent; pad = 0} in
-             replace (KBody KType) L ~pad:0 (h :: p)
+             replace body L ~pad:0 (h :: p)
            else
              let h = {h with indent = h.column} in
-             replace (KBody KType) T ~pad:indent (h :: p)
+             replace body T ~pad:indent (h :: p)
        | _ ->
            make_infix tok block.path)
   | COLONEQUAL ->

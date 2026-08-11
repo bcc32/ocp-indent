@@ -246,16 +246,16 @@ See a standard let-in for reference:
     let
       type
         t
-        =
-        | A
-        | B of int
+      =
+      | A
+      | B of int
     in
     match A with A -> 0 | B i -> i
   
   let x =
     let type t =
-          | A
-          | B of int
+      | A
+      | B of int
     in
     ()
 
@@ -295,16 +295,16 @@ See a standard let-in for reference:
     let
       type
         t
-        +=
-        | A
-        | B of int
+      +=
+      | A
+      | B of int
     in
     match A with A -> 0 | B i -> i | _ -> 0
   
   let x =
     let type t +=
-          | A
-          | B of int
+      | A
+      | B of int
     in
     match A with A -> 0 | B i -> i | _ -> 0
 
@@ -411,8 +411,8 @@ See a standard let-in for reference:
         f
         :
         int -> int
-        =
-        "f"
+      =
+      "f"
     in
     f 2
   
@@ -466,18 +466,18 @@ See a standard let-in for reference:
     let
       class
         c
-        =
-        object
-          method f x = x + 1
-        end
+      =
+      object
+        method f x = x + 1
+      end
     in
     (new c)#f 1
   
   let x =
     let class c =
-          object
-            method f x = f + 1
-          end
+      object
+        method f x = f + 1
+      end
     in
     (new c)#f 1
 
@@ -527,18 +527,18 @@ See a standard let-in for reference:
       class
         type
         c
-        =
-        object
-          method f : int -> int
-        end
+      =
+      object
+        method f : int -> int
+      end
     in
     ()
   
   let x =
     let class type c =
-          object
-            method f : int -> int
-          end
+      object
+        method f : int -> int
+      end
     in
     ()
 
