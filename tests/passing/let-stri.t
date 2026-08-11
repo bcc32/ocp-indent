@@ -15,6 +15,12 @@ See a standard let-in for reference:
   > 2
   > in
   > y + 2
+  > 
+  > let x =
+  > let y =
+  > 2
+  > in
+  > y + 2
   > EOF
 
   $ ocp-indent test.ml
@@ -27,6 +33,12 @@ See a standard let-in for reference:
     let
       y
       =
+      2
+    in
+    y + 2
+  
+  let x =
+    let y =
       2
     in
     y + 2
@@ -62,6 +74,16 @@ See a standard let-in for reference:
   > List
   > in
   > N.singleton M.x
+  > 
+  > let x =
+  > let module M = struct
+  > let x = 2
+  > end
+  > in
+  > let module N =
+  > List
+  > in
+  > N.singleton M.x
   > EOF
 
   $ ocp-indent test.ml
@@ -93,6 +115,16 @@ See a standard let-in for reference:
       List
     in
     N.singleton M.x
+  
+  let x =
+    let module M = struct
+      let x = 2
+    end
+    in
+    let module N =
+      List
+    in
+    N.singleton M.x
 
 2. let open _ in:
 
@@ -106,6 +138,12 @@ See a standard let-in for reference:
   > M
   > in
   > M.x
+  > 
+  > let x =
+  > let open
+  > M
+  > in
+  > M.x
   > EOF
 
   $ ocp-indent test.ml
@@ -116,6 +154,12 @@ See a standard let-in for reference:
     let
       open
         M
+    in
+    M.x
+  
+  let x =
+    let open
+      M
     in
     M.x
 
@@ -135,6 +179,12 @@ See a standard let-in for reference:
   > int
   > in
   > try 0 with E i -> i
+  > 
+  > let x =
+  > let exception
+  > E of int
+  > in
+  > try 0 with E i -> i
   > EOF
 
   $ ocp-indent test.ml
@@ -149,6 +199,12 @@ See a standard let-in for reference:
       E
       of
         int
+    in
+    try 0 with E i -> i
+  
+  let x =
+    let exception
+      E of int
     in
     try 0 with E i -> i
 
@@ -170,6 +226,13 @@ See a standard let-in for reference:
   > | B of int
   > in
   > match A with A -> 0 | B i -> i
+  > 
+  > let x =
+  > let type t =
+  > | A
+  > | B of int
+  > in
+  > ()
   > EOF
 
   $ ocp-indent test.ml
@@ -188,6 +251,13 @@ See a standard let-in for reference:
         | B of int
     in
     match A with A -> 0 | B i -> i
+  
+  let x =
+    let type t =
+          | A
+          | B of int
+    in
+    ()
 
 5. let type t += _ in:
 
@@ -202,6 +272,13 @@ See a standard let-in for reference:
   > type
   > t
   > +=
+  > | A
+  > | B of int
+  > in
+  > match A with A -> 0 | B i -> i | _ -> 0
+  > 
+  > let x =
+  > let type t +=
   > | A
   > | B of int
   > in
@@ -223,6 +300,13 @@ See a standard let-in for reference:
         | B of int
     in
     match A with A -> 0 | B i -> i | _ -> 0
+  
+  let x =
+    let type t +=
+          | A
+          | B of int
+    in
+    match A with A -> 0 | B i -> i | _ -> 0
 
 6. let module type _ in:
 
@@ -242,6 +326,13 @@ See a standard let-in for reference:
   > S
   > =
   > sig
+  > val x : int
+  > end
+  > in
+  > ()
+  > 
+  > let x =
+  > let module type S = sig
   > val x : int
   > end
   > in
@@ -268,6 +359,13 @@ See a standard let-in for reference:
     end
     in
     ()
+  
+  let x =
+    let module type S = sig
+      val x : int
+    end
+    in
+    ()
 
 7. let external _ in:
 
@@ -284,6 +382,14 @@ See a standard let-in for reference:
   > external
   > f
   > :
+  > int -> int
+  > =
+  > "f"
+  > in
+  > f 2
+  > 
+  > let x =
+  > let external f :
   > int -> int
   > =
   > "f"
@@ -309,6 +415,14 @@ See a standard let-in for reference:
         "f"
     in
     f 2
+  
+  let x =
+    let external f :
+      int -> int
+      =
+      "f"
+    in
+    f 2
 
 8. let class _ in:
 
@@ -330,6 +444,14 @@ See a standard let-in for reference:
   > end
   > in
   > (new c)#f 1
+  > 
+  > let x =
+  > let class c =
+  > object
+  > method f x = f + 1
+  > end
+  > in
+  > (new c)#f 1
   > EOF
 
   $ ocp-indent test.ml
@@ -348,6 +470,14 @@ See a standard let-in for reference:
         object
           method f x = x + 1
         end
+    in
+    (new c)#f 1
+  
+  let x =
+    let class c =
+          object
+            method f x = f + 1
+          end
     in
     (new c)#f 1
 
@@ -373,6 +503,14 @@ See a standard let-in for reference:
   > end
   > in
   > ()
+  > 
+  > let x =
+  > let class type c =
+  > object
+  > method f : int -> int
+  > end
+  > in
+  > ()
   > EOF
 
   $ ocp-indent test.ml
@@ -393,6 +531,14 @@ See a standard let-in for reference:
         object
           method f : int -> int
         end
+    in
+    ()
+  
+  let x =
+    let class type c =
+          object
+            method f : int -> int
+          end
     in
     ()
 
@@ -446,6 +592,20 @@ See a standard let-in for reference:
   > end
   > in
   > M.x + N.x
+  > 
+  > let x =
+  > let module rec N : sig
+  > val x : int
+  > end = struct
+  > let x = 1
+  > end
+  > and M : sig
+  > val x : int
+  > end = struct
+  > let x = 2
+  > end
+  > in
+  > in
   > EOF
 
   $ ocp-indent test.ml
@@ -496,3 +656,17 @@ See a standard let-in for reference:
     end
     in
     M.x + N.x
+  
+  let x =
+    let module rec N : sig
+      val x : int
+    end = struct
+      let x = 1
+    end
+    and M : sig
+      val x : int
+    end = struct
+      let x = 2
+    end
+    in
+  in
