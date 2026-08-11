@@ -14,6 +14,8 @@
 + Update to cmdliner 2 and install completion scripts for common shells
   (#351, @NathanReb)
 + Add explicit support for external types (#353, @NathanReb)
++ Add explicit support for new 5.5 let in constructs: `let type`, `let
+  external`, `let class` (#354, @NathanReb)
 
 ## 1.9.0
 

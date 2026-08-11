@@ -97,3 +97,55 @@ Same applies to extensible variant types:
   type t +=
   | A
   | B
+
+This should also be honored within a 'let type'
+construct:
+
+  $ cat > test.ml << EOF
+  > let x =
+  > let type t =
+  > | A
+  > | B of int
+  > in
+  > let type u +=
+  > | A
+  > | B of int
+  > in
+  > ()
+  > EOF
+
+  $ ocp-indent --config strict_with=never test.ml
+  let x =
+    let type t =
+      | A
+      | B of int
+    in
+    let type u +=
+      | A
+      | B of int
+    in
+    ()
+
+  $ ocp-indent --config strict_with=auto test.ml
+  let x =
+    let type t =
+      | A
+      | B of int
+    in
+    let type u +=
+      | A
+      | B of int
+    in
+    ()
+
+  $ ocp-indent --config strict_with=always test.ml
+  let x =
+    let type t =
+    | A
+    | B of int
+    in
+    let type u +=
+    | A
+    | B of int
+    in
+    ()
